@@ -59,6 +59,24 @@ class Model
         ]);
     }
 
+    public function save() 
+    {
+        $fields = [];
+        foreach ($this->column_names as $column)
+        {
+            $fields[$column] = $this->$column;
+        }
+        // check for update or insert 
+        if (property_exists($this, 'id') && $this->id != '')
+        {
+            return $this->update($this->id, $fields);
+        }
+        else
+        {
+            return $this->insert($fields);
+        }
+    }
+
     public function insert($fields)
     {
         if (empty($fields)) return false;
@@ -82,6 +100,33 @@ class Model
             ]);
         }
         return $this->delete($this->_table, $id);
+    }
+
+    public function data()
+    {
+        $data = new stdClass();
+        foreach ($this->column_names as $column)
+        {
+            $data->get_column = $this->column;
+        }
+        return $data;
+    }
+
+    public function assign($params)
+    {
+        if (!empty($params))
+        {
+            foreach ($params as $key => $val)
+            {
+                if (in_array($key, $this->_column_names))
+                {
+                    $this->$key = sanitize($val);
+                }
+            }
+            return true;
+
+        }
+        return false;
     }
 
     protected function populate_object_data($result) 
